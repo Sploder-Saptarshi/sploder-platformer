@@ -12,6 +12,7 @@
     <movie minorVersion="2" />
     <movie platform="Flash Player" />
     <movie background="#000000" />
+    <movie preferredSDK="C:\users\saptarshi\Documents\GitHub\sploder-physics-reborn\flex" />
   </output>
   <!-- Other classes to be compiled into your SWF -->
   <classpaths>
