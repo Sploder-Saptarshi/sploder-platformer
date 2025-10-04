@@ -1,4 +1,4 @@
-# sploder-platformer
+# sploder-platformer-html5
 
 Original client-side AS3/Flash source code for the Sploder (http://www.sploder.com) Platformer
 
