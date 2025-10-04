@@ -22,11 +22,12 @@ package {
             if (Security.sandboxType == "localWithFile") {
                 return null;
             }
+            return null; // Disabled since MochiBot is defunct
             var self:MochiBot = new MochiBot();
             parent.addChild(self);
             Security.allowDomain("*");
             Security.allowInsecureDomain("*");
-            var server:String = "http://core.mochibot.com/my/core.swf";
+            var server:String = "";
             var lv:URLVariables = new URLVariables();
             lv["sb"] = Security.sandboxType;
             lv["v"] = Capabilities.version;

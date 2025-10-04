@@ -605,15 +605,22 @@
 			}
 				
 			
+			// Ruffle compatibility: Use explicit type checks and safe value retrieval
 			if (_game.currentLevel.gameObjective.type == GameObjective.TYPE_MELEE) {
 				
-				currentCount = (PlayObject.totals["evil"] - PlayObject.counts["evil"]);
-				total = PlayObject.totals["evil"];
+				if (PlayObject.totals != null && PlayObject.totals.hasOwnProperty("evil") &&
+					PlayObject.counts != null && PlayObject.counts.hasOwnProperty("evil")) {
+					currentCount = (int(PlayObject.totals["evil"]) - int(PlayObject.counts["evil"]));
+					total = int(PlayObject.totals["evil"]);
+				}
 				
 			} else if (_game.currentLevel.gameObjective.type == GameObjective.TYPE_CAPTURE) {
 				
-				currentCount = (PowerUpController.totals["crystal"] - PowerUpController.counts["crystal"]);
-				total = PowerUpController.totals["crystal"];
+				if (PowerUpController.totals != null && PowerUpController.totals.hasOwnProperty("crystal") &&
+					PowerUpController.counts != null && PowerUpController.counts.hasOwnProperty("crystal")) {
+					currentCount = (int(PowerUpController.totals["crystal"]) - int(PowerUpController.counts["crystal"]));
+					total = int(PowerUpController.totals["crystal"]);
+				}
 				
 			}
 			

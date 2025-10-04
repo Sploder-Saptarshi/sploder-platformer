@@ -269,8 +269,71 @@ package
 		
 		//
 		//
+		protected function countObjectivesFromXML():void {
+			
+			// Parse XML to manually count enemies and crystals for Ruffle compatibility
+			var objects:Array = _levelNode.firstChild.nodeValue.split("|");
+			var def:Array;
+			var objID:int;
+			
+			var enemyCount:int = 0;
+			var crystalCount:int = 0;
+			var escapePodCount:int = 0;
+			
+			// Count specific object IDs (cid values from library_definitions.xml)
+			for (var i:int = 0; i < objects.length; i++) {
+				def = objects[i].split(",");
+				objID = parseInt(def[0]);
+				
+				// Enemy IDs - cid range 300-319 (all enemies have group="evil")
+				if (objID >= 300 && objID <= 319) {
+					enemyCount++;
+				}
+				
+				// Crystal ID: 202
+				if (objID == 202) {
+					crystalCount++;
+				}
+				
+				// Escape pod ID: 212
+				if (objID == 212) {
+					escapePodCount++;
+				}
+			}
+			
+			// Initialize totals and counts if they don't exist (Ruffle shim)
+			if (PowerUpController.totals == null) PowerUpController.totals = {};
+			if (PowerUpController.counts == null) PowerUpController.counts = {};
+			if (PlayObject.totals == null) PlayObject.totals = {};
+			if (PlayObject.counts == null) PlayObject.counts = {};
+			
+			// Set manual counts
+			if (crystalCount > 0) {
+				PowerUpController.totals["crystal"] = crystalCount;
+				PowerUpController.counts["crystal"] = crystalCount;
+				trace("Manual count: " + crystalCount + " crystals");
+			}
+			
+			if (escapePodCount > 0) {
+				PowerUpController.totals["escapepod"] = escapePodCount;
+				PowerUpController.counts["escapepod"] = escapePodCount;
+				trace("Manual count: " + escapePodCount + " escape pods");
+			}
+			
+			if (enemyCount > 0) {
+				PlayObject.totals["evil"] = enemyCount;
+				PlayObject.counts["evil"] = enemyCount;
+				trace("Manual count: " + enemyCount + " enemies");
+			}
+			
+		}
+		
+		//
+		//
 		protected function populateGame ():void {
 			
+			// Manually count objectives from XML for Ruffle compatibility
+			countObjectivesFromXML();
 			
 			var attribs_cache:Dictionary = new Dictionary();
 			
@@ -591,7 +654,7 @@ package
 					if (p.tools_head) player.body.tools_head.copyTools(p.tools_head);
 					
 					player.body.tools_lt.copyTools(p.tools_lt, true);
-					player.body.tools_rt.copyTools(p.tools_rt, true);
+					player.body.tools_rt.copyTools(p.tools.rt, true);
 					
 					player.body.tools_lt.setTool(p.tools_lt_current);
 					player.body.tools_rt.setTool(p.tools_rt_current);
@@ -752,6 +815,4 @@ package
 			
 		}
 		
-	}
-
-}
+}	}
