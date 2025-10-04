@@ -106,13 +106,50 @@
 		
 		protected var _localSaveTimer:Timer;
 		
-		protected var _transferring:Boolean = false;
-		
-		public function get hasGraphics ():Boolean {
-			return (_xml != null && _xml.firstChild.attributes.g == "1");
+	protected var _transferring:Boolean = false;
+	
+	// Custom idMap implementation for Ruffle compatibility
+	protected var _idMap:Object = {};
+	
+	public function get hasGraphics ():Boolean {
+		return (_xml != null && _xml.firstChild.attributes.g == "1");
+	}
+	
+	// Helper method to build idMap from XMLDocument (Ruffle compatibility)
+	protected function buildIdMap(xmlDoc:XMLDocument):void {
+		_idMap = {};
+		if (xmlDoc && xmlDoc.firstChild) {
+			traverseAndMapIds(xmlDoc.firstChild);
+		}
+	}
+	
+	// Recursively traverse XML nodes and build id map
+	protected function traverseAndMapIds(node:XMLNode):void {
+		if (node.attributes && node.attributes.id) {
+			_idMap[node.attributes.id] = node;
 		}
 		
-		//
+		for (var i:int = 0; i < node.childNodes.length; i++) {
+			if (node.childNodes[i]) {
+				traverseAndMapIds(node.childNodes[i]);
+			}
+		}
+	}
+	
+	// Helper method to get node by id (Ruffle compatibility)
+	protected function getNodeById(id:String):XMLNode {
+		// Try custom idMap first
+		if (_idMap && _idMap[id]) {
+			return _idMap[id] as XMLNode;
+		}
+		
+		// Fallback to XMLDocument.idMap if available (for non-Ruffle environments)
+		if (_xml && _xml.idMap && _xml.idMap[id]) {
+			return _xml.idMap[id] as XMLNode;
+		}
+		
+		return null;
+	}		//
 		//
 		public function CreatorProject(creator:Creator, saveURL:String, saveParams:String = "", publishURL:String = "") {
 			
@@ -171,16 +208,18 @@
         //
         public function getObjects (level:uint = 0):String {
             
-			if (_xml != null &&
-				_xml.idMap["levels"] != null) {
+			if (_xml != null) {
+				var levelsNode:XMLNode = getNodeById("levels");
+				if (levelsNode != null) {
 			
-				if (_xml.idMap["levels"].childNodes.length > level) {
-				
-					var objectsNode:XMLNode = _xml.idMap["levels"].childNodes[level];  
-					return objectsNode.firstChild.nodeValue;
+					if (levelsNode.childNodes.length > level) {
+					
+						var objectsNode:XMLNode = levelsNode.childNodes[level];  
+						return objectsNode.firstChild.nodeValue;
+					
+					}
 				
 				}
-			
 			}
 			
 			return "";
@@ -192,16 +231,18 @@
         //
         public function getEnvironment (level:uint = 0):String {
             
-			if (_xml != null &&
-				_xml.idMap["levels"] != null) {
+			if (_xml != null) {
+				var levelsNode:XMLNode = getNodeById("levels");
+				if (levelsNode != null) {
 			
-				if (_xml.idMap["levels"].childNodes.length > level) {
-				
-					var objectsNode:XMLNode = _xml.idMap["levels"].childNodes[level];  
-					if (objectsNode != null && objectsNode.attributes["env"] != null) return objectsNode.attributes["env"];
+					if (levelsNode.childNodes.length > level) {
+					
+						var objectsNode:XMLNode = levelsNode.childNodes[level];  
+						if (objectsNode != null && objectsNode.attributes["env"] != null) return objectsNode.attributes["env"];
+					
+					}
 				
 				}
-			
 			}
 			
 			return "";
@@ -213,16 +254,18 @@
         //
         public function getMusic (level:uint = 0):String {
             
-			if (_xml != null &&
-				_xml.idMap["levels"] != null) {
+			if (_xml != null) {
+				var levelsNode:XMLNode = getNodeById("levels");
+				if (levelsNode != null) {
 			
-				if (_xml.idMap["levels"].childNodes.length > level) {
-				
-					var objectsNode:XMLNode = _xml.idMap["levels"].childNodes[level];  
-					if (objectsNode != null && objectsNode.attributes["music"] != null) return objectsNode.attributes["music"];
+					if (levelsNode.childNodes.length > level) {
+					
+						var objectsNode:XMLNode = levelsNode.childNodes[level];  
+						if (objectsNode != null && objectsNode.attributes["music"] != null) return objectsNode.attributes["music"];
+					
+					}
 				
 				}
-			
 			}
 			
 			return "";
@@ -233,16 +276,18 @@
         //
         public function getAvatar (level:uint = 0):int {
             
-			if (_xml != null &&
-				_xml.idMap["levels"] != null) {
+			if (_xml != null) {
+				var levelsNode:XMLNode = getNodeById("levels");
+				if (levelsNode != null) {
 			
-				if (_xml.idMap["levels"].childNodes.length > level) {
-				
-					var objectsNode:XMLNode = _xml.idMap["levels"].childNodes[level];  
-					if (objectsNode != null && objectsNode.attributes["avatar"] != null) return parseInt(objectsNode.attributes["avatar"]);
+					if (levelsNode.childNodes.length > level) {
+					
+						var objectsNode:XMLNode = levelsNode.childNodes[level];  
+						if (objectsNode != null && objectsNode.attributes["avatar"] != null) return parseInt(objectsNode.attributes["avatar"]);
+					
+					}
 				
 				}
-			
 			}
 			
 			return 0;
@@ -254,16 +299,18 @@
         //
         public function getLevelName (level:uint = 0):String {
             
-			if (_xml != null &&
-				_xml.idMap["levels"] != null) {
+			if (_xml != null) {
+				var levelsNode:XMLNode = getNodeById("levels");
+				if (levelsNode != null) {
 			
-				if (_xml.idMap["levels"].childNodes.length > level) {
-				
-					var objectsNode:XMLNode = _xml.idMap["levels"].childNodes[level];  
-					if (objectsNode != null && objectsNode.attributes["name"] != null) return unescape(unescape(objectsNode.attributes["name"]));
+					if (levelsNode.childNodes.length > level) {
+					
+						var objectsNode:XMLNode = levelsNode.childNodes[level];  
+						if (objectsNode != null && objectsNode.attributes["name"] != null) return unescape(unescape(objectsNode.attributes["name"]));
+					
+					}
 				
 				}
-			
 			}
 			
 			return "";
@@ -274,11 +321,13 @@
 		//
 		public function getTotalLevels ():uint {
 			
-			if (_xml != null &&
-				_xml.idMap["levels"] != null) {
+			if (_xml != null) {
+				var levelsNode:XMLNode = getNodeById("levels");
+				if (levelsNode != null) {
 			
-				return _xml.idMap["levels"].childNodes.length;
-				
+					return levelsNode.childNodes.length;
+					
+				}
 			}
 				
 			return 0;
@@ -292,6 +341,7 @@
         public function newDocument ():void {
 
             _xml = new XMLDocument(_newXMLString);
+			buildIdMap(_xml); // Rebuild idMap for Ruffle compatibility
 			pubkey = "";
 			projID = NO_ID;
 			title = NO_TITLE;
@@ -320,20 +370,25 @@
 			var levelsNodes:String = "";
 			
 			var objectsNode:XMLNode;
+			var levelsNode:XMLNode = getNodeById("levels");
 			
 			if (!currentLevelOnly) {
 				
 				for (var i:int = 0; i < Creator.levels.totalLevels; i++) {
 					
-					objectsNode = _xml.idMap["levels"].childNodes[i];
+					if (levelsNode && levelsNode.childNodes.length > i) {
+						objectsNode = levelsNode.childNodes[i];
+					}
 					levelsNodes += "<level name=\"" + escape(escape(Creator.levels.exportLevelName(i))) + "\" env=\"" + Creator.levels.exportEnvironmentData(i) + "\" music=\"" + Creator.levels.exportMusicData(i) + "\" avatar=\"" + Creator.levels.exportAvatarData(i) + "\">" + Creator.levels.exportLevelData(i) + "</level>";
 				
 				}
 			
 			} else {
 				
-				objectsNode = _xml.idMap["levels"].childNodes[Creator.levels.currentLevel];
-				levelsNodes += "<level env=\"" + Creator.levels.exportEnvironmentData(Creator.levels.currentLevel) + "\" music=\"" + Creator.levels.exportMusicData(Creator.levels.currentLevel) + "\" avatar=\"" + Creator.levels.exportAvatarData(i) + "\">" + Creator.levels.exportLevelData(Creator.levels.currentLevel) + "</level>";
+				if (levelsNode && levelsNode.childNodes.length > Creator.levels.currentLevel) {
+					objectsNode = levelsNode.childNodes[Creator.levels.currentLevel];
+				}
+				levelsNodes += "<level env=\"" + Creator.levels.exportEnvironmentData(Creator.levels.currentLevel) + "\" music=\"" + Creator.levels.exportMusicData(Creator.levels.currentLevel) + "\" avatar=\"" + Creator.levels.exportAvatarData(Creator.levels.currentLevel) + "\">" + Creator.levels.exportLevelData(Creator.levels.currentLevel) + "</level>";
 				
 			}
 			
@@ -383,6 +438,7 @@
 			}
 			
 			_xml = new XMLDocument(template);
+			buildIdMap(_xml); // Rebuild idMap for Ruffle compatibility
 			
 			if (projID != null && projID.length > 0) _xml.firstChild.attributes.id = projID;
 			else projID = NO_ID;
@@ -464,6 +520,7 @@
 			_xml = new XMLDocument();
 			_xml.ignoreWhite = true;
 			_xml.parseXML(template);
+			buildIdMap(_xml); // Rebuild idMap for Ruffle compatibility
 			
 			_xml.firstChild.attributes.id = id;
 			_xml.firstChild.attributes.pubkey = pubkey;	
@@ -581,9 +638,10 @@
 				{
 					var t:Number = getTimer();
 					
-					if (_xml.idMap['levels'])
+					var levelsNode:XMLNode = getNodeById('levels');
+					if (levelsNode)
 					{
-						var levels:XMLNode = _xml.idMap['levels'];
+						var levels:XMLNode = levelsNode;
 						var dummyGraphicData:Array = [0, 0, 0];
 						
 						for (var i:int = 0; i < levels.childNodes.length; i++)
@@ -758,6 +816,7 @@
 			_xml = new XMLDocument();
 			_xml.ignoreWhite = true;
 			_xml.parseXML(e.target.data);
+			buildIdMap(_xml); // Rebuild idMap for Ruffle compatibility
 			
 			if (_xml.firstChild.firstChild.nodeName != "levels") {
 				convertOldXMLToNew();
@@ -878,6 +937,7 @@
 				
 				_prevXMLString = Settings.loadSetting("creator2temp") as String;
 				_xml = new XMLDocument(_prevXMLString);
+				buildIdMap(_xml); // Rebuild idMap for Ruffle compatibility
 				
 				if (_xml.firstChild.firstChild.nodeName != "levels") {
 					convertOldXMLToNew();

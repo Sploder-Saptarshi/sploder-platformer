@@ -53,6 +53,52 @@
 		protected var _xml:XMLDocument;
 		protected var _xmlFeatured:XMLDocument;
 		
+		// Custom idMap implementation for Ruffle compatibility
+		protected var _idMap:Object = {};
+		protected var _idMapFeatured:Object = {};
+		
+		// Helper method to build idMap from XMLDocument (Ruffle compatibility)
+		protected function buildIdMap(xmlDoc:XMLDocument, targetMap:Object):void {
+			targetMap = {};
+			for (var key:String in targetMap) {
+				delete targetMap[key];
+			}
+			if (xmlDoc && xmlDoc.firstChild) {
+				traverseAndMapIds(xmlDoc.firstChild, targetMap);
+			}
+		}
+		
+		// Recursively traverse XML nodes and build id map
+		protected function traverseAndMapIds(node:XMLNode, targetMap:Object):void {
+			if (node.attributes && node.attributes.id) {
+				targetMap[node.attributes.id] = node;
+			}
+			
+			for (var i:int = 0; i < node.childNodes.length; i++) {
+				if (node.childNodes[i]) {
+					traverseAndMapIds(node.childNodes[i], targetMap);
+				}
+			}
+		}
+		
+		// Helper method to get node by id (Ruffle compatibility)
+		protected function getNodeById(id:String, useFeatured:Boolean = false):XMLNode {
+			var targetMap:Object = useFeatured ? _idMapFeatured : _idMap;
+			var xmlDoc:XMLDocument = useFeatured ? _xmlFeatured : _xml;
+			
+			// Try custom idMap first
+			if (targetMap && targetMap[id]) {
+				return targetMap[id] as XMLNode;
+			}
+			
+			// Fallback to XMLDocument.idMap if available (for non-Ruffle environments)
+			if (xmlDoc && xmlDoc.idMap && xmlDoc.idMap[id]) {
+				return xmlDoc.idMap[id] as XMLNode;
+			}
+			
+			return null;
+		}
+		
 		protected var _listURL:String = "";
 		public function get listURL():String { return _listURL; }
 		public function set listURL(value:String):void { _listURL = value; }
@@ -374,10 +420,12 @@
 			_xml = new XMLDocument();
 			_xml.ignoreWhite = true;
 			_xml.parseXML(xmlString);
+			buildIdMap(_xml, _idMap);
 			
 			_xmlFeatured = new XMLDocument();
 			_xmlFeatured.ignoreWhite = true;
 			_xmlFeatured.parseXML(featuredXMLString);
+			buildIdMap(_xmlFeatured, _idMapFeatured);
 			
 			_resultsTotal = tracks.length;
 			_resultsNum = _featuredTotal = featuredTracks.length;
@@ -559,7 +607,8 @@
 				_currentMusicTrack = ref.id;
 				currentTrackURL = ref.url;
 				
-				if (_xml.idMap[_currentMusicTrack]) {
+				var trackNode:XMLNode = getNodeById(_currentMusicTrack, false);
+				if (trackNode) {
 					
 					_nameField.value = "Loading...";
 					
@@ -620,8 +669,9 @@
 		
 		protected function onSongLoaded (e:Event):void {
 			
-			if (_xml.idMap && _xml.idMap[_currentMusicTrack]) {
-				_nameField.value = unescape(_xml.idMap[_currentMusicTrack].attributes.title)
+			var trackNode:XMLNode = getNodeById(_currentMusicTrack, false);
+			if (trackNode) {
+				_nameField.value = unescape(trackNode.attributes.title)
 			}
 			
 			if (processor) processor.stop();

@@ -111,7 +111,9 @@
 					root.loaderInfo.loaderURL.indexOf("http://sploder.home") == 0 || 
 					root.loaderInfo.loaderURL.indexOf("http://192.168.") == 0 || 
 					root.loaderInfo.loaderURL.indexOf("file://") == 0) startup();
-				else statusText.text = "Sitelock activated.";
+				else { statusText.text = "Sitelock failed to activate.";
+					startup(); 
+				}
 				
 			}
 			

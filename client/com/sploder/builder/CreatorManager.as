@@ -63,6 +63,45 @@
 		
 		protected var _xml:XMLDocument;
 		
+		// Custom idMap implementation for Ruffle compatibility
+		protected var _idMap:Object = {};
+		
+		// Helper method to build idMap from XMLDocument (Ruffle compatibility)
+		protected function buildIdMap(xmlDoc:XMLDocument):void {
+			_idMap = {};
+			if (xmlDoc && xmlDoc.firstChild) {
+				traverseAndMapIds(xmlDoc.firstChild);
+			}
+		}
+		
+		// Recursively traverse XML nodes and build id map
+		protected function traverseAndMapIds(node:XMLNode):void {
+			if (node.attributes && node.attributes.id) {
+				_idMap[node.attributes.id] = node;
+			}
+			
+			for (var i:int = 0; i < node.childNodes.length; i++) {
+				if (node.childNodes[i]) {
+					traverseAndMapIds(node.childNodes[i]);
+				}
+			}
+		}
+		
+		// Helper method to get node by id (Ruffle compatibility)
+		protected function getNodeById(id:String):XMLNode {
+			// Try custom idMap first
+			if (_idMap && _idMap[id]) {
+				return _idMap[id] as XMLNode;
+			}
+			
+			// Fallback to XMLDocument.idMap if available (for non-Ruffle environments)
+			if (_xml && _xml.idMap && _xml.idMap[id]) {
+				return _xml.idMap[id] as XMLNode;
+			}
+			
+			return null;
+		}
+	
 		protected var _listURL:String = "";
 		public function get listURL():String { return _listURL; }
 		public function set listURL(value:String):void { _listURL = value; }
@@ -191,6 +230,9 @@
 			_xml = new XMLDocument();
 			_xml.ignoreWhite = true;
 			_xml.parseXML(e.target.data);
+			
+			// Build idMap from loaded XML (Ruffle compatibility)
+			buildIdMap(_xml);
 			
 			if (_mode == MODE_SAVE) _nameField.selectable = true;
 			
@@ -422,7 +464,10 @@
 				
 				_selectedProject = clip;
 				_currentProjectID = clip.value;
-				_nameField.value = unescape(_xml.idMap[_currentProjectID].attributes.title);
+				var projectNode:XMLNode = getNodeById(_currentProjectID);
+				if (projectNode) {
+					_nameField.value = unescape(projectNode.attributes.title);
+				}
 				
 				toggleConfirmButton(true);
 				
