@@ -125,13 +125,13 @@
 				
 				User["done"] = false;
 				
-				if (_testButton == null) {
-					_testButton = Creator.creatorlibrary.getDisplayObject("testbutton") as SimpleButton;
-					_testButton.x = 73;
-					_testButton.y = 25;
-					_testButton.tabEnabled = false;
-					_testButton.addEventListener(MouseEvent.CLICK, onTestButtonClicked)
-				}
+				// if (_testButton == null) {
+				// 	_testButton = Creator.creatorlibrary.getDisplayObject("testbutton") as SimpleButton;
+				// 	_testButton.x = 73;
+				// 	_testButton.y = 25;
+				// 	_testButton.tabEnabled = false;
+				// 	_testButton.addEventListener(MouseEvent.CLICK, onTestButtonClicked)
+				// }
 			
 				_gameLoader = new Loader();
 				_gameLoader.tabEnabled = false;
@@ -151,11 +151,11 @@
 					_gameLoader.load(new URLRequest("fullgame2.swf?testing=true"), new LoaderContext(false, testDomain));
 				} else {
 					//_gameLoader.load(new URLRequest("fullgame2_b10.swf"), new LoaderContext(false, testDomain));
-					_gameLoader.load(new URLRequest("fullgame2_b17.swf?testing=true"), new LoaderContext(false, testDomain));
+					_gameLoader.load(new URLRequest("../staging/fullgame2.swf?testing=true"), new LoaderContext(false, testDomain));
 				}
 				
-				_creator.testingMask.visible = true;
-				_previewing = true;
+				_creator.testingMask.visible = false;
+				_previewing = false;
 				
 			}
 			
