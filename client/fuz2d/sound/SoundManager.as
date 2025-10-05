@@ -27,7 +27,7 @@ package fuz2d.sound {
 		
 		protected var _initialized:Boolean = false;
 		
-		public static var baseURL:String = "http://sploder.s3.amazonaws.com/";
+		public static var baseURL:String = "/";
 		
         private static var _hasSound:Boolean = true;
         public static function get hasSound ():Boolean { return _hasSound; }

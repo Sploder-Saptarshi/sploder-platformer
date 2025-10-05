@@ -81,25 +81,28 @@
 			}
 		}
 		
-		// Helper method to get node by id (Ruffle compatibility)
-		protected function getNodeById(id:String, useFeatured:Boolean = false):XMLNode {
-			var targetMap:Object = useFeatured ? _idMapFeatured : _idMap;
-			var xmlDoc:XMLDocument = useFeatured ? _xmlFeatured : _xml;
-			
-			// Try custom idMap first
-			if (targetMap && targetMap[id]) {
-				return targetMap[id] as XMLNode;
-			}
-			
-			// Fallback to XMLDocument.idMap if available (for non-Ruffle environments)
+	// Helper method to get node by id (Ruffle compatibility)
+	protected function getNodeById(id:String, useFeatured:Boolean = false):XMLNode {
+		var targetMap:Object = useFeatured ? _idMapFeatured : _idMap;
+		var xmlDoc:XMLDocument = useFeatured ? _xmlFeatured : _xml;
+		
+		// Try custom idMap first
+		if (targetMap && targetMap[id]) {
+			return targetMap[id] as XMLNode;
+		}
+		
+		// Fallback to XMLDocument.idMap if available (for non-Ruffle environments)
+		// Use try-catch to avoid Ruffle errors when idMap property doesn't exist
+		try {
 			if (xmlDoc && xmlDoc.idMap && xmlDoc.idMap[id]) {
 				return xmlDoc.idMap[id] as XMLNode;
 			}
-			
-			return null;
+		} catch (e:Error) {
+			// idMap not available in Ruffle, use custom implementation only
 		}
 		
-		protected var _listURL:String = "";
+		return null;
+	}		protected var _listURL:String = "";
 		public function get listURL():String { return _listURL; }
 		public function set listURL(value:String):void { _listURL = value; }
 	
@@ -523,6 +526,11 @@
 			var XMLref:XMLNode;
 			
             _populating = true;
+			
+			// Clear existing items to prevent duplicates (Ruffle compatibility)
+			if (_listContainer) {
+				_listContainer.clear();
+			}
 			
 			_items = { };
 			
