@@ -269,9 +269,13 @@ package
 		
 		//
 		//
-		protected function countObjectivesFromXML():void {
+		protected function verifyObjectiveCounts():void {
 			
-			// Parse XML to manually count enemies and crystals for Ruffle compatibility
+			// After objects are created, verify counts were set correctly
+			// This is a Ruffle compatibility shim - in Flash, objects increment counts in constructors
+			// In Ruffle, this might not work, so we manually set them here as a fallback
+			
+			// Parse XML to count enemies and crystals
 			var objects:Array = _levelNode.firstChild.nodeValue.split("|");
 			var def:Array;
 			var objID:int;
@@ -307,23 +311,36 @@ package
 			if (PlayObject.totals == null) PlayObject.totals = {};
 			if (PlayObject.counts == null) PlayObject.counts = {};
 			
-			// Set manual counts
+			// Verify and fix counts that weren't set by object constructors (Ruffle bug workaround)
 			if (crystalCount > 0) {
 				PowerUpController.totals["crystal"] = crystalCount;
-				PowerUpController.counts["crystal"] = crystalCount;
-				trace("Manual count: " + crystalCount + " crystals");
+				// If counts weren't incremented properly by constructors, set them manually
+				if (PowerUpController.counts["crystal"] == null || PowerUpController.counts["crystal"] == 0) {
+					PowerUpController.counts["crystal"] = crystalCount;
+					trace("[Ruffle Fix] Set crystal count to: " + crystalCount);
+				} else {
+					trace("Crystal count OK: " + PowerUpController.counts["crystal"] + "/" + crystalCount);
+				}
 			}
 			
 			if (escapePodCount > 0) {
 				PowerUpController.totals["escapepod"] = escapePodCount;
-				PowerUpController.counts["escapepod"] = escapePodCount;
-				trace("Manual count: " + escapePodCount + " escape pods");
+				if (PowerUpController.counts["escapepod"] == null || PowerUpController.counts["escapepod"] == 0) {
+					PowerUpController.counts["escapepod"] = escapePodCount;
+					trace("[Ruffle Fix] Set escape pod count to: " + escapePodCount);
+				} else {
+					trace("Escape pod count OK: " + PowerUpController.counts["escapepod"] + "/" + escapePodCount);
+				}
 			}
 			
 			if (enemyCount > 0) {
 				PlayObject.totals["evil"] = enemyCount;
-				PlayObject.counts["evil"] = enemyCount;
-				trace("Manual count: " + enemyCount + " enemies");
+				if (PlayObject.counts["evil"] == null || PlayObject.counts["evil"] == 0) {
+					PlayObject.counts["evil"] = enemyCount;
+					trace("[Ruffle Fix] Set enemy count to: " + enemyCount);
+				} else {
+					trace("Enemy count OK: " + PlayObject.counts["evil"] + "/" + enemyCount);
+				}
 			}
 			
 		}
@@ -331,9 +348,6 @@ package
 		//
 		//
 		protected function populateGame ():void {
-			
-			// Manually count objectives from XML for Ruffle compatibility
-			countObjectivesFromXML();
 			
 			var attribs_cache:Dictionary = new Dictionary();
 			
@@ -461,6 +475,9 @@ package
 				playerAttribs["graphic_rectnames"] = player.object.graphic_rectnames;
 				
 			}
+			
+			// After all objects are created, verify counts are set correctly (Ruffle fallback)
+			verifyObjectiveCounts();
 			
 			_game.onLevelLoaded();
 			

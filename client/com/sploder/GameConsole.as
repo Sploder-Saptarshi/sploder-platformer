@@ -569,8 +569,8 @@
 		//
 		protected function onStatusChange (e:PlayfieldEvent = null):void {
 			
-			var currentCount:int;
-			var total:int;
+			var currentCount:int = 0;
+			var total:int = 0;
 			
 			if (e && e.type == PlayfieldEvent.POWERUP && 
 				e.playObject is PlayObjectControllable && 
@@ -610,16 +610,22 @@
 				
 				if (PlayObject.totals != null && PlayObject.totals.hasOwnProperty("evil") &&
 					PlayObject.counts != null && PlayObject.counts.hasOwnProperty("evil")) {
-					currentCount = (int(PlayObject.totals["evil"]) - int(PlayObject.counts["evil"]));
-					total = int(PlayObject.totals["evil"]);
+					var evilTotal:int = (PlayObject.totals["evil"] != null) ? int(PlayObject.totals["evil"]) : 0;
+					var evilCounts:int = (PlayObject.counts["evil"] != null) ? int(PlayObject.counts["evil"]) : 0;
+					currentCount = evilTotal - evilCounts;
+					total = evilTotal;
+					trace("Console MELEE: currentCount=" + currentCount + " (total=" + evilTotal + " - counts=" + evilCounts + ")");
 				}
 				
 			} else if (_game.currentLevel.gameObjective.type == GameObjective.TYPE_CAPTURE) {
 				
 				if (PowerUpController.totals != null && PowerUpController.totals.hasOwnProperty("crystal") &&
 					PowerUpController.counts != null && PowerUpController.counts.hasOwnProperty("crystal")) {
-					currentCount = (int(PowerUpController.totals["crystal"]) - int(PowerUpController.counts["crystal"]));
-					total = int(PowerUpController.totals["crystal"]);
+					var crystalTotal:int = (PowerUpController.totals["crystal"] != null) ? int(PowerUpController.totals["crystal"]) : 0;
+					var crystalCounts:int = (PowerUpController.counts["crystal"] != null) ? int(PowerUpController.counts["crystal"]) : 0;
+					currentCount = crystalTotal - crystalCounts;
+					total = crystalTotal;
+					trace("Console CAPTURE: currentCount=" + currentCount + " (total=" + crystalTotal + " - counts=" + crystalCounts + ")");
 				}
 				
 			}

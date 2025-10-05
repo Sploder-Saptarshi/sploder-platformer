@@ -115,22 +115,35 @@ package
 		//
 		public function onStatusChange (e:PlayfieldEvent = null):void {
 			
-			var currentCount:int;
-			var total:int;
+			var currentCount:int = 0;
+			var total:int = 0;
 			
 			if (_type == GameObjective.TYPE_MELEE) {
 				
-				currentCount = (PlayObject.totals["evil"] - PlayObject.counts["evil"]);
-				total = PlayObject.totals["evil"];
+				// Convert undefined/null to 0 for proper comparison
+				var evilTotal:int = (PlayObject.totals != null && PlayObject.totals["evil"] != null) ? int(PlayObject.totals["evil"]) : 0;
+				var evilCount:int = (PlayObject.counts != null && PlayObject.counts["evil"] != null) ? int(PlayObject.counts["evil"]) : 0;
+				
+				currentCount = evilTotal - evilCount;
+				total = evilTotal;
+				
+				trace("MELEE: currentCount=" + currentCount + " (total=" + evilTotal + " - count=" + evilCount + "), total=" + total);
 				
 			} else if (_type == GameObjective.TYPE_CAPTURE) {
 				
-				currentCount = (PowerUpController.totals["crystal"] - PowerUpController.counts["crystal"]);
-				total = PowerUpController.totals["crystal"];
+				// Convert undefined/null to 0 for proper comparison
+				var crystalTotal:int = (PowerUpController.totals != null && PowerUpController.totals["crystal"] != null) ? int(PowerUpController.totals["crystal"]) : 0;
+				var crystalCount:int = (PowerUpController.counts != null && PowerUpController.counts["crystal"] != null) ? int(PowerUpController.counts["crystal"]) : 0;
+				
+				currentCount = crystalTotal - crystalCount;
+				total = crystalTotal;
+				
+				trace("CAPTURE: currentCount=" + currentCount + " (total=" + crystalTotal + " - count=" + crystalCount + "), total=" + total);
 				
 			}
 			
-			if ((currentCount == total && !Game.ended && 
+			// Only complete if total is a valid positive number and currentCount equals total
+			if ((total > 0 && currentCount == total && !Game.ended && 
 					(_type == GameObjective.TYPE_CAPTURE || _type == GameObjective.TYPE_MELEE) 
 				) || (
 					(e != null && e.type == PlayfieldEvent.ESCAPED && _type == GameObjective.TYPE_ESCAPE)
