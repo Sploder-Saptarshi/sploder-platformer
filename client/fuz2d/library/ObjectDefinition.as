@@ -641,15 +641,15 @@ package fuz2d.library {
 								
 									var addToBelt:Boolean = (dnactrl.@addtobelt == "1");
 									
-									soundID = (dnactrl.@sound != undefined) ? String(dnactrl.@sound) : "powerup";
-									
-									var attribIsGlobal:Boolean = ("@global" in dnactrl && dnactrl.@global == "1");
-									var attribIsModifier:Boolean = ("@modifier" in dnactrl && dnactrl.@modifier == "1");
-									var spendAtEnd:Boolean = ("@spendatend" in dnactrl && dnactrl.@spendatend == "1");
-									
-									return new PowerUpController(child as PlayObjectControllable, dnactrl.@attrib, attribIsModifier, attribIsGlobal, power, restore, addToBelt, spendAtEnd, soundID); 
+								soundID = (dnactrl.@sound != undefined) ? String(dnactrl.@sound) : "powerup";
 								
-								case "escapepod":
+								var attribIsGlobal:Boolean = ("@global" in dnactrl && dnactrl.@global == "1");
+								var attribIsModifier:Boolean = ("@modifier" in dnactrl && dnactrl.@modifier == "1");
+								var spendAtEnd:Boolean = ("@spendatend" in dnactrl && dnactrl.@spendatend == "1");
+								
+								trace("ObjectDefinition.newController POWER: attrib=" + dnactrl.@attrib + ", @global in dnactrl=" + ("@global" in dnactrl) + ", dnactrl.@global=" + dnactrl.@global + ", attribIsGlobal=" + attribIsGlobal);
+								
+								return new PowerUpController(child as PlayObjectControllable, dnactrl.@attrib, attribIsModifier, attribIsGlobal, power, restore, addToBelt, spendAtEnd, soundID);								case "escapepod":
 								
 									return new EscapePodController(child as PlayObjectControllable);
 									

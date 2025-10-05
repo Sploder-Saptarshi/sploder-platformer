@@ -53,22 +53,24 @@ package fuz2d.action.play {
 			if (_simObjectRef != null) _simObjectRef.type = type;
 		}
 		
-		override public function set group(value:String):void 
-		{
-			if (_global && group != null && !isNaN(counts[group])) counts[group]--;
+	override public function set group(value:String):void 
+	{
+		// Ruffle compatibility: Use explicit decrement instead of -- operator
+		if (_global && group != null && counts != null && counts[group] != null && !isNaN(counts[group])) {
+			var oldCount:int = int(counts[group]);
+			counts[group] = oldCount - 1;
+		}
+		
+		super.group = value;
+		if (_simObjectRef != null) _simObjectRef.group = _group;
+		
+		if (_global) {
 			
-			super.group = value;
-			if (_simObjectRef != null) _simObjectRef.group = _group;
+			if (totals[group] == undefined) totals[group] = 0;
+			totals[group]++;
 			
-			if (_global) {
-				
-				if (totals[group] == undefined) totals[group] = 0;
-				totals[group]++;
-				
-				if (counts[group] == undefined) counts[group] = 0;
-				counts[group]++;
-			
-			}
+			if (counts[group] == undefined) counts[group] = 0;
+			counts[group]++;			}
 			
 		}
 		
@@ -315,17 +317,18 @@ package fuz2d.action.play {
 			
 		}
 		
-		//
-		//
-		protected function die ():void {
-			
-			if (!_deleted && _global && _group != null && _group.length > 0 && !isNaN(counts[_group])) {
-				counts[_group]--;
-			}			
-			
-		}
+	//
+	//
+	protected function die ():void {
 		
-		//
+		// Ruffle compatibility: Use explicit decrement instead of -- operator
+		if (!_deleted && _global && _group != null && _group.length > 0 && counts != null && counts[_group] != null && !isNaN(counts[_group])) {
+			var currentCount:int = int(counts[_group]);
+			counts[_group] = currentCount - 1;
+			trace("PlayObject.die: " + _group + " count decremented from " + currentCount + " to " + counts[_group]);
+		}			
+		
+	}		//
 		//
 		override public function destroy ():void {
 			

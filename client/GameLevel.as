@@ -311,37 +311,58 @@ package
 			if (PlayObject.totals == null) PlayObject.totals = {};
 			if (PlayObject.counts == null) PlayObject.counts = {};
 			
+			trace("=== VERIFY OBJECTIVE COUNTS ===");
+			trace("Found in XML: enemies=" + enemyCount + ", crystals=" + crystalCount + ", escapePods=" + escapePodCount);
+			
 			// Verify and fix counts that weren't set by object constructors (Ruffle bug workaround)
 			if (crystalCount > 0) {
+				trace("BEFORE: PowerUpController.totals['crystal']=" + PowerUpController.totals["crystal"] + ", counts['crystal']=" + PowerUpController.counts["crystal"]);
+				
+				// Always set totals to the expected count
 				PowerUpController.totals["crystal"] = crystalCount;
+				
 				// If counts weren't incremented properly by constructors, set them manually
-				if (PowerUpController.counts["crystal"] == null || PowerUpController.counts["crystal"] == 0) {
+				if (PowerUpController.counts["crystal"] == null || isNaN(PowerUpController.counts["crystal"]) || PowerUpController.counts["crystal"] == 0) {
 					PowerUpController.counts["crystal"] = crystalCount;
 					trace("[Ruffle Fix] Set crystal count to: " + crystalCount);
 				} else {
-					trace("Crystal count OK: " + PowerUpController.counts["crystal"] + "/" + crystalCount);
+					trace("Crystal count was set by constructors: " + PowerUpController.counts["crystal"]);
 				}
+				
+				trace("AFTER: PowerUpController.totals['crystal']=" + PowerUpController.totals["crystal"] + ", counts['crystal']=" + PowerUpController.counts["crystal"]);
 			}
 			
 			if (escapePodCount > 0) {
+				trace("BEFORE: PowerUpController.totals['escapepod']=" + PowerUpController.totals["escapepod"] + ", counts['escapepod']=" + PowerUpController.counts["escapepod"]);
+				
 				PowerUpController.totals["escapepod"] = escapePodCount;
-				if (PowerUpController.counts["escapepod"] == null || PowerUpController.counts["escapepod"] == 0) {
+				
+				if (PowerUpController.counts["escapepod"] == null || isNaN(PowerUpController.counts["escapepod"]) || PowerUpController.counts["escapepod"] == 0) {
 					PowerUpController.counts["escapepod"] = escapePodCount;
 					trace("[Ruffle Fix] Set escape pod count to: " + escapePodCount);
 				} else {
-					trace("Escape pod count OK: " + PowerUpController.counts["escapepod"] + "/" + escapePodCount);
+					trace("Escape pod count was set by constructors: " + PowerUpController.counts["escapepod"]);
 				}
+				
+				trace("AFTER: PowerUpController.totals['escapepod']=" + PowerUpController.totals["escapepod"] + ", counts['escapepod']=" + PowerUpController.counts["escapepod"]);
 			}
 			
 			if (enemyCount > 0) {
+				trace("BEFORE: PlayObject.totals['evil']=" + PlayObject.totals["evil"] + ", counts['evil']=" + PlayObject.counts["evil"]);
+				
 				PlayObject.totals["evil"] = enemyCount;
-				if (PlayObject.counts["evil"] == null || PlayObject.counts["evil"] == 0) {
+				
+				if (PlayObject.counts["evil"] == null || isNaN(PlayObject.counts["evil"]) || PlayObject.counts["evil"] == 0) {
 					PlayObject.counts["evil"] = enemyCount;
 					trace("[Ruffle Fix] Set enemy count to: " + enemyCount);
 				} else {
-					trace("Enemy count OK: " + PlayObject.counts["evil"] + "/" + enemyCount);
+					trace("Enemy count was set by constructors: " + PlayObject.counts["evil"]);
 				}
+				
+				trace("AFTER: PlayObject.totals['evil']=" + PlayObject.totals["evil"] + ", counts['evil']=" + PlayObject.counts["evil"]);
 			}
+			
+			trace("=== END VERIFY OBJECTIVE COUNTS ===");
 			
 		}
 		

@@ -43,36 +43,37 @@ package fuz2d.action.control {
 		public static var totals:Object;
 		public static var counts:Object;
 		
-		//
-		//
-		public function PowerUpController (object:PlayObjectControllable, powerAttribName:String = "", isModifier:Boolean = false, global:Boolean = false, power:int = 0, restoreTime:int = -1, addToBelt:Boolean = false, spendAtEnd:Boolean = false, spendSound:String = "") {
+	//
+	//
+	public function PowerUpController (object:PlayObjectControllable, powerAttribName:String = "", isModifier:Boolean = false, global:Boolean = false, power:int = 0, restoreTime:int = -1, addToBelt:Boolean = false, spendAtEnd:Boolean = false, spendSound:String = "") {
+	
+		super(object);
 		
-			super(object);
-			
-			if (totals == null) totals = { };
-			if (counts == null) counts = { };
-			
-			_powerAttribName = powerAttribName;
-			_isModifier = isModifier;
-			_global = global;
-			_power = power;
-			_restoreTime = restoreTime;
-			_addToBelt = addToBelt;
-			_spendAtEnd = spendAtEnd;
-			_spendSound = spendSound;
-			
-			if (_global) {
-				if (totals[_powerAttribName] == null) totals[_powerAttribName] = 0;
-				totals[_powerAttribName]++;
-				if (counts[_powerAttribName] == null) counts[_powerAttribName] = 0;
-				counts[_powerAttribName]++;
-			}
-			
-			_object.simObject.addEventListener(CollisionEvent.COLLISION, onCollision, false, 0, true);
-			
+		if (totals == null) totals = { };
+		if (counts == null) counts = { };
+		
+		_powerAttribName = powerAttribName;
+		_isModifier = isModifier;
+		_global = global;
+		_power = power;
+		_restoreTime = restoreTime;
+		_addToBelt = addToBelt;
+		_spendAtEnd = spendAtEnd;
+		_spendSound = spendSound;
+		
+		trace("PowerUpController constructor: powerAttribName=" + _powerAttribName + ", _global=" + _global);
+		
+		if (_global) {
+			if (totals[_powerAttribName] == null) totals[_powerAttribName] = 0;
+			totals[_powerAttribName]++;
+			if (counts[_powerAttribName] == null) counts[_powerAttribName] = 0;
+			counts[_powerAttribName]++;
+			trace("PowerUpController constructor: Incremented " + _powerAttribName + " - totals=" + totals[_powerAttribName] + ", counts=" + counts[_powerAttribName]);
 		}
-
-		//
+		
+		_object.simObject.addEventListener(CollisionEvent.COLLISION, onCollision, false, 0, true);
+		
+	}		//
 		//
 		override public function update (e:Event):void {
 			
@@ -88,19 +89,31 @@ package fuz2d.action.control {
 				
 		}
 		
-		public function spend (e:CollisionEvent):void {
+	public function spend (e:CollisionEvent):void {
+		
+		trace("PowerUpController.spend called: _spent=" + _spent + ", collider.type=" + e.collider.type + ", _powerAttribName=" + _powerAttribName);
+		
+		if (!_spent && e.collider.type == "player") {
 			
-			if (!_spent && e.collider.type == "player") {
-				
-				_spent = true;
-				
-				if (_global) counts[_powerAttribName]--;
-				
-				if (!_spendAtEnd) {
-					_object.playfield.dispatchEvent(new PlayfieldEvent(PlayfieldEvent.POWERUP, false, false, _object));
-				}
-				
-				Symbol(_object.object).state = "f_spent";
+			_spent = true;
+			
+			trace("PowerUpController.spend: _global=" + _global + ", counts=" + counts + ", counts[" + _powerAttribName + "]=" + counts[_powerAttribName]);
+			
+			// Ruffle compatibility: Always decrement for objective items (crystal, escapepod)
+			// even if _global flag wasn't set properly
+			var isObjectiveItem:Boolean = (_powerAttribName == "crystal" || _powerAttribName == "escapepod");
+			
+			if ((isObjectiveItem || _global) && counts != null && counts[_powerAttribName] != null) {
+				var currentCount:int = int(counts[_powerAttribName]);
+				counts[_powerAttribName] = currentCount - 1;
+				trace("PowerUpController.spend: " + _powerAttribName + " count decremented from " + currentCount + " to " + counts[_powerAttribName]);
+			} else {
+				trace("PowerUpController.spend: SKIPPED decrement - _global=" + _global + ", isObjectiveItem=" + isObjectiveItem + ", counts null=" + (counts == null) + ", counts[" + _powerAttribName + "] null=" + (counts[_powerAttribName] == null));
+			}
+			
+			if (!_spendAtEnd) {
+				_object.playfield.dispatchEvent(new PlayfieldEvent(PlayfieldEvent.POWERUP, false, false, _object));
+			}				Symbol(_object.object).state = "f_spent";
 				_spendTime = TimeStep.realTime;
 				
 				if (_spendSound.length > 0) {
